@@ -7,6 +7,7 @@ class HunterClient:
     API_EMAIL_FINDER_PATH = 'email-finder'
     API_EMAIL_VERIFIER_PATH = 'email-verifier'
     API_TIMEOUT = 10
+    EMAIL_VALID_STATUS = 'valid'
 
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
