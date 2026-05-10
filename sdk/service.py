@@ -1,6 +1,8 @@
 from sdk.client import HunterClient
 from storages.base import BaseStorage
 
+EMAIL_VALID_STATUS = 'valid'
+
 
 class HunterService:
 
@@ -19,4 +21,4 @@ class HunterService:
     def _is_email_verified(self, email: str) -> bool:
         response_data = self.client.verify_email(email)
         verification_data = response_data.get('data') or {}
-        return verification_data.get('status') == self.client.EMAIL_VALID_STATUS
+        return verification_data.get('status') == EMAIL_VALID_STATUS

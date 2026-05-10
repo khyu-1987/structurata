@@ -8,8 +8,6 @@ API_TIMEOUT = 10
 
 class HunterClient:
 
-    EMAIL_VALID_STATUS = 'valid'
-
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
 
