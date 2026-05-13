@@ -14,11 +14,31 @@ export HUNTER_API_KEY=your-key
 ```python
 import config
 from sdk.client import HunterClient
-from sdk.service import HunterService
+from sdk.service import (
+    EmailFinder,
+    EmailVerifier,
+    VerifiedEmailRecorder,
+    VerifiedEmailRunner,
+)
 from storages.in_memory import InMemoryStorage
 
-service = HunterService(HunterClient(config.HUNTER_API_KEY), InMemoryStorage())
-service.save_verified_email_data(domain='reddit.com', first_name='Alexis', last_name='Ohanian')
+client = HunterClient(config.HUNTER_API_KEY)
+runner = VerifiedEmailRunner(
+    finder=EmailFinder(client),
+    verifier=EmailVerifier(client),
+    recorder=VerifiedEmailRecorder(InMemoryStorage()),
+)
+runner.run(domain='reddit.com', first_name='Alexis', last_name='Ohanian')
+```
+
+## Logging
+
+The SDK logs to `sdk.service` at `INFO`. To see those logs, configure logging in your application:
+
+```python
+import logging
+logging.basicConfig(level=logging.INFO)
+logging.getLogger('sdk').setLevel(logging.INFO)
 ```
 
 ## Checks
