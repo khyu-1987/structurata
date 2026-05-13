@@ -1,12 +1,18 @@
 import pytest
 
 from sdk.client import HunterClient
-from sdk.service import HunterService
+from sdk.models import FindEmailResponse, VerifyEmailResponse
+from sdk.service import (
+    EmailFinder,
+    EmailVerifier,
+    VerifiedEmailRecorder,
+    VerifiedEmailRunner,
+)
 from storages.in_memory import InMemoryStorage
 
 
 @pytest.fixture
-def storage() -> InMemoryStorage:
+def storage() -> InMemoryStorage[dict]:
     return InMemoryStorage()
 
 
@@ -16,26 +22,51 @@ def client() -> HunterClient:
 
 
 @pytest.fixture
-def service(client: HunterClient, storage: InMemoryStorage) -> HunterService:
-    return HunterService(client=client, storage=storage)
+def finder(client: HunterClient) -> EmailFinder:
+    return EmailFinder(client)
 
 
 @pytest.fixture
-def find_email_response() -> dict:
+def verifier(client: HunterClient) -> EmailVerifier:
+    return EmailVerifier(client)
+
+
+@pytest.fixture
+def recorder(storage: InMemoryStorage[dict]) -> VerifiedEmailRecorder:
+    return VerifiedEmailRecorder(storage=storage)
+
+
+@pytest.fixture
+def runner(
+    finder: EmailFinder,
+    verifier: EmailVerifier,
+    recorder: VerifiedEmailRecorder,
+) -> VerifiedEmailRunner:
+    return VerifiedEmailRunner(finder=finder, verifier=verifier, recorder=recorder)
+
+
+@pytest.fixture
+def find_email_response_json() -> dict:
     return {
         'data': {
             'email': 'alexis@reddit.com',
             'first_name': 'Alexis',
             'last_name': 'Ohanian',
+            'domain': 'reddit.com',
         },
     }
 
 
 @pytest.fixture
-def verify_email_valid_response() -> dict:
-    return {'data': {'status': 'valid'}}
+def find_email_response(find_email_response_json: dict) -> FindEmailResponse:
+    return FindEmailResponse.model_validate(find_email_response_json)
 
 
 @pytest.fixture
-def verify_email_invalid_response() -> dict:
-    return {'data': {'status': 'invalid'}}
+def verify_email_valid_response() -> VerifyEmailResponse:
+    return VerifyEmailResponse.model_validate({'data': {'status': 'valid'}})
+
+
+@pytest.fixture
+def verify_email_invalid_response() -> VerifyEmailResponse:
+    return VerifyEmailResponse.model_validate({'data': {'status': 'invalid'}})

@@ -1,37 +1,60 @@
 from pytest_mock import MockerFixture
 
-from sdk.service import HunterService
+from sdk.models import FindEmailResponse, VerifyEmailResponse
+from sdk.service import VerifiedEmailRunner
 from storages.in_memory import InMemoryStorage
 
 
-class TestHunterService:
+class TestVerifiedEmailRunner:
 
-    def test_save_email_valid_ok(
+    def test_run_email_valid_ok(
         self,
-        service: HunterService,
-        storage: InMemoryStorage,
+        runner: VerifiedEmailRunner,
+        storage: InMemoryStorage[dict],
         mocker: MockerFixture,
-        find_email_response: dict,
-        verify_email_valid_response: dict,
+        find_email_response: FindEmailResponse,
+        verify_email_valid_response: VerifyEmailResponse,
     ) -> None:
-        mocker.patch.object(service.client, 'find_email', return_value=find_email_response)
-        mocker.patch.object(service.client, 'verify_email', return_value=verify_email_valid_response)
+        mocker.patch.object(runner.finder.client, 'find_email', return_value=find_email_response)
+        mocker.patch.object(runner.verifier.client, 'verify_email', return_value=verify_email_valid_response)
 
-        service.save_verified_email_data('reddit.com', 'Alexis', 'Ohanian')
+        runner.run('reddit.com', 'Alexis', 'Ohanian')
 
-        assert storage.read('alexis@reddit.com') == find_email_response['data']
+        assert storage.read('alexis@reddit.com') == {
+            'email': 'alexis@reddit.com',
+            'first_name': 'Alexis',
+            'last_name': 'Ohanian',
+            'domain': 'reddit.com',
+            'status': 'valid',
+        }
 
-    def test_save_email_invalid_fail(
+    def test_run_email_invalid_fail(
         self,
-        service: HunterService,
-        storage: InMemoryStorage,
+        runner: VerifiedEmailRunner,
+        storage: InMemoryStorage[dict],
         mocker: MockerFixture,
-        find_email_response: dict,
-        verify_email_invalid_response: dict,
+        find_email_response: FindEmailResponse,
+        verify_email_invalid_response: VerifyEmailResponse,
     ) -> None:
-        mocker.patch.object(service.client, 'find_email', return_value=find_email_response)
-        mocker.patch.object(service.client, 'verify_email', return_value=verify_email_invalid_response)
+        mocker.patch.object(runner.finder.client, 'find_email', return_value=find_email_response)
+        mocker.patch.object(runner.verifier.client, 'verify_email', return_value=verify_email_invalid_response)
 
-        service.save_verified_email_data('reddit.com', 'Alexis', 'Ohanian')
+        runner.run('reddit.com', 'Alexis', 'Ohanian')
 
+        assert storage.read_all() == []
+
+    def test_run_no_email_found_skips_verify_and_save(
+        self,
+        runner: VerifiedEmailRunner,
+        storage: InMemoryStorage[dict],
+        mocker: MockerFixture,
+    ) -> None:
+        empty_response = FindEmailResponse.model_validate({'data': {'email': None}})
+        find_mock = mocker.patch.object(runner.finder.client, 'find_email', return_value=empty_response)
+        verify_mock = mocker.patch.object(runner.verifier.client, 'verify_email')
+
+        runner.run('reddit.com', 'Alexis', 'Ohanian')
+
+        find_mock.assert_called_once()
+        verify_mock.assert_not_called()
         assert storage.read_all() == []
