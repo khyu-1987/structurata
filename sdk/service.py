@@ -1,32 +1,57 @@
 from sdk.client import HunterClient
-from sdk.models import VerifiedEmailRecord
+from sdk.models import FindEmailData, VerifiedEmailRecord
 from storages.base import BaseStorage
 
 EMAIL_VALID_STATUS = 'valid'
 
 
-class HunterService:
+class EmailFinder:
 
-    def __init__(self, client: HunterClient, storage: BaseStorage[dict]) -> None:
+    def __init__(self, client: HunterClient) -> None:
         self.client = client
+
+    def find(self, domain: str, first_name: str, last_name: str) -> FindEmailData:
+        return self.client.find_email(domain, first_name, last_name).data
+
+
+class EmailVerifier:
+
+    def __init__(self, client: HunterClient) -> None:
+        self.client = client
+
+    def verify(self, email: str) -> str:
+        return self.client.verify_email(email).data.status
+
+
+class VerifiedEmailRecorder:
+
+    def __init__(self, storage: BaseStorage[dict]) -> None:
         self.storage = storage
 
-    def save_verified_email_data(self, domain: str, first_name: str, last_name: str) -> None:
-        find_data = self.client.find_email(domain, first_name, last_name).data
+    def record(self, record: VerifiedEmailRecord) -> None:
+        self.storage.create(key=record.email, record=record.model_dump())
+
+
+class VerifiedEmailRunner:
+
+    def __init__(self, finder: EmailFinder, verifier: EmailVerifier, recorder: VerifiedEmailRecorder) -> None:
+        self.finder = finder
+        self.verifier = verifier
+        self.recorder = recorder
+
+    def run(self, domain: str, first_name: str, last_name: str) -> None:
+        find_data = self.finder.find(domain, first_name, last_name)
         if not find_data.email:
             return
 
-        if not self._is_email_verified(find_data.email):
+        status = self.verifier.verify(find_data.email)
+        if status != EMAIL_VALID_STATUS:
             return
 
-        record = VerifiedEmailRecord(
+        self.recorder.record(VerifiedEmailRecord(
             email=find_data.email,
             first_name=find_data.first_name,
             last_name=find_data.last_name,
             domain=find_data.domain,
-            status=EMAIL_VALID_STATUS,
-        )
-        self.storage.create(key=find_data.email, record=record.model_dump())
-
-    def _is_email_verified(self, email: str) -> bool:
-        return self.client.verify_email(email).data.status == EMAIL_VALID_STATUS
+            status=status,
+        ))
