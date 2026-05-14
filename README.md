@@ -11,6 +11,8 @@ export HUNTER_API_KEY=your-key
 
 ## Use
 
+Context manager (preferred):
+
 ```python
 import config
 from sdk.client import HunterClient
@@ -22,13 +24,13 @@ from sdk.services import (
 )
 from storages.in_memory import InMemoryStorage
 
-client = HunterClient(config.HUNTER_API_KEY)
-runner = VerifiedEmailRunner(
-    finder=EmailFinder(client),
-    verifier=EmailVerifier(client),
-    recorder=VerifiedEmailRecorder(InMemoryStorage()),
-)
-runner.run(domain='reddit.com', first_name='Alexis', last_name='Ohanian')
+with HunterClient(config.HUNTER_API_KEY) as client:
+    runner = VerifiedEmailRunner(
+        finder=EmailFinder(client),
+        verifier=EmailVerifier(client),
+        recorder=VerifiedEmailRecorder(InMemoryStorage()),
+    )
+    runner.run(domain='reddit.com', first_name='Alexis', last_name='Ohanian')
 ```
 
 ## Logging

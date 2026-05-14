@@ -1,5 +1,6 @@
 from http import HTTPStatus
-from typing import Any, TypeVar
+from types import TracebackType
+from typing import Any, Self, TypeVar
 
 import requests
 from pydantic import BaseModel, ValidationError
@@ -81,6 +82,20 @@ class HunterClient:
     def __init__(self, api_key: str) -> None:
         self.api_key = api_key
         self.session = _build_session()
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        self.close()
+
+    def close(self) -> None:
+        self.session.close()
 
     def find_email(
         self, domain: str, first_name: str, last_name: str
