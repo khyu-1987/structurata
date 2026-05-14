@@ -29,11 +29,11 @@ class EmailVerifier:
 
 class VerifiedEmailRecorder:
 
-    def __init__(self, storage: BaseStorage[dict]) -> None:
+    def __init__(self, storage: BaseStorage[VerifiedEmailRecord]) -> None:
         self.storage = storage
 
     def record(self, record: VerifiedEmailRecord) -> None:
-        self.storage.create(key=record.email, record=record.model_dump())
+        self.storage.create(key=record.email, record=record)
 
 
 class VerifiedEmailRunner:

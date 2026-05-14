@@ -1,6 +1,6 @@
 from pytest_mock import MockerFixture
 
-from sdk.models import FindEmailResponse, VerifyEmailResponse
+from sdk.models import FindEmailResponse, VerifiedEmailRecord, VerifyEmailResponse
 from sdk.services import VerifiedEmailRunner
 from storages.in_memory import InMemoryStorage
 
@@ -10,7 +10,7 @@ class TestVerifiedEmailRunner:
     def test_run_email_valid_ok(
         self,
         runner: VerifiedEmailRunner,
-        storage: InMemoryStorage[dict],
+        email_storage: InMemoryStorage[VerifiedEmailRecord],
         mocker: MockerFixture,
         find_email_response: FindEmailResponse,
         verify_email_valid_response: VerifyEmailResponse,
@@ -26,18 +26,18 @@ class TestVerifiedEmailRunner:
 
         runner.run("reddit.com", "Alexis", "Ohanian")
 
-        assert storage.read("alexis@reddit.com") == {
-            "email": "alexis@reddit.com",
-            "first_name": "Alexis",
-            "last_name": "Ohanian",
-            "domain": "reddit.com",
-            "status": "valid",
-        }
+        assert email_storage.read("alexis@reddit.com") == VerifiedEmailRecord(
+            email="alexis@reddit.com",
+            first_name="Alexis",
+            last_name="Ohanian",
+            domain="reddit.com",
+            status="valid",
+        )
 
     def test_run_email_invalid_fail(
         self,
         runner: VerifiedEmailRunner,
-        storage: InMemoryStorage[dict],
+        email_storage: InMemoryStorage[VerifiedEmailRecord],
         mocker: MockerFixture,
         find_email_response: FindEmailResponse,
         verify_email_invalid_response: VerifyEmailResponse,
@@ -53,12 +53,12 @@ class TestVerifiedEmailRunner:
 
         runner.run("reddit.com", "Alexis", "Ohanian")
 
-        assert storage.read_all() == []
+        assert email_storage.read_all() == []
 
     def test_run_no_email_found_skips_verify_and_save(
         self,
         runner: VerifiedEmailRunner,
-        storage: InMemoryStorage[dict],
+        email_storage: InMemoryStorage[VerifiedEmailRecord],
         mocker: MockerFixture,
     ) -> None:
         empty_response = FindEmailResponse.model_validate({"data": {"email": None}})
@@ -71,4 +71,4 @@ class TestVerifiedEmailRunner:
 
         find_mock.assert_called_once()
         verify_mock.assert_not_called()
-        assert storage.read_all() == []
+        assert email_storage.read_all() == []

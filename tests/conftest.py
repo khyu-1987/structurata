@@ -1,7 +1,7 @@
 import pytest
 
 from sdk.client import HunterClient
-from sdk.models import FindEmailResponse, VerifyEmailResponse
+from sdk.models import FindEmailResponse, VerifiedEmailRecord, VerifyEmailResponse
 from sdk.services import (
     EmailFinder,
     EmailVerifier,
@@ -13,6 +13,11 @@ from storages.in_memory import InMemoryStorage
 
 @pytest.fixture
 def storage() -> InMemoryStorage[dict]:
+    return InMemoryStorage()
+
+
+@pytest.fixture
+def email_storage() -> InMemoryStorage[VerifiedEmailRecord]:
     return InMemoryStorage()
 
 
@@ -32,8 +37,8 @@ def verifier(client: HunterClient) -> EmailVerifier:
 
 
 @pytest.fixture
-def recorder(storage: InMemoryStorage[dict]) -> VerifiedEmailRecorder:
-    return VerifiedEmailRecorder(storage=storage)
+def recorder(email_storage: InMemoryStorage[VerifiedEmailRecord]) -> VerifiedEmailRecorder:
+    return VerifiedEmailRecorder(storage=email_storage)
 
 
 @pytest.fixture
