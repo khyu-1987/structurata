@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import requests
 from pydantic import BaseModel, ValidationError
@@ -65,7 +65,7 @@ def _raise_for_status(response: requests.Response) -> None:
     raise _exception_for_status(status)(f"HTTP {status}")
 
 
-def _parse_response(payload: dict, model: type[ResponseModel]) -> ResponseModel:
+def _parse_response(payload: dict[str, Any], model: type[ResponseModel]) -> ResponseModel:
     try:
         return model.model_validate(payload)
     except ValidationError as exc:
@@ -96,7 +96,7 @@ class HunterClient:
             self._make_request(url, query_params), VerifyEmailResponse
         )
 
-    def _make_request(self, url: str, query_params: dict) -> dict:
+    def _make_request(self, url: str, query_params: dict) -> dict[str, Any]:
         headers = {"Authorization": f"Bearer {self.api_key}"}
         try:
             response = self.session.get(

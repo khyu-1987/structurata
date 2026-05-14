@@ -76,7 +76,7 @@ class TestHunterClient:
         )
 
 
-class TestHunterBadRequestErrors:
+class TestHunterClientErrors:
 
     @pytest.mark.parametrize(("status_code", "expected_exc"), STATUS_TO_EXCEPTION)
     def test_error_status_raises_typed_exception(
