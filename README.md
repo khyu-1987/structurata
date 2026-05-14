@@ -14,7 +14,7 @@ export HUNTER_API_KEY=your-key
 ```python
 import config
 from sdk.client import HunterClient
-from sdk.service import (
+from sdk.services import (
     EmailFinder,
     EmailVerifier,
     VerifiedEmailRecorder,
@@ -33,7 +33,7 @@ runner.run(domain='reddit.com', first_name='Alexis', last_name='Ohanian')
 
 ## Logging
 
-The SDK logs to `sdk.service` at `INFO`. To see those logs, configure logging in your application:
+The SDK logs to `sdk.services` at `INFO`. To see those logs, configure logging in your application:
 
 ```python
 import logging

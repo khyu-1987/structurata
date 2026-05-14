@@ -67,7 +67,9 @@ def _raise_for_status(response: requests.Response) -> None:
     raise _exception_for_status(status)(f"HTTP {status}")
 
 
-def _parse_response(payload: dict[str, Any], model: type[ResponseModel]) -> ResponseModel:
+def _parse_response(
+    payload: dict[str, Any], model: type[ResponseModel]
+) -> ResponseModel:
     try:
         return model.model_validate(payload)
     except ValidationError as exc:

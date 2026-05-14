@@ -1,7 +1,7 @@
 from pytest_mock import MockerFixture
 
 from sdk.models import FindEmailResponse, VerifyEmailResponse
-from sdk.service import VerifiedEmailRunner
+from sdk.services import VerifiedEmailRunner
 from storages.in_memory import InMemoryStorage
 
 

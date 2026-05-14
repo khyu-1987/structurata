@@ -2,7 +2,7 @@ import pytest
 
 from sdk.client import HunterClient
 from sdk.models import FindEmailResponse, VerifyEmailResponse
-from sdk.service import (
+from sdk.services import (
     EmailFinder,
     EmailVerifier,
     VerifiedEmailRecorder,
