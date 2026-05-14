@@ -23,6 +23,7 @@ API_TIMEOUT_SECONDS = 10
 RETRY_TOTAL = 3
 RETRY_BACKOFF_FACTOR = 0.5
 RETRYABLE_STATUS_CODES = (
+    HTTPStatus.TOO_MANY_REQUESTS,
     HTTPStatus.INTERNAL_SERVER_ERROR,
     HTTPStatus.BAD_GATEWAY,
     HTTPStatus.SERVICE_UNAVAILABLE,
@@ -43,6 +44,7 @@ def _build_session() -> requests.Session:
         backoff_factor=RETRY_BACKOFF_FACTOR,
         status_forcelist=RETRYABLE_STATUS_CODES,
         allowed_methods=("GET",),
+        raise_on_status=False,
     )
     session.mount("https://", HTTPAdapter(max_retries=retry))
     return session
