@@ -2,7 +2,7 @@ from typing import Generic, TypeVar
 
 from storages.base import BaseStorage
 
-RecordType = TypeVar('RecordType')
+RecordType = TypeVar("RecordType")
 
 
 class InMemoryStorage(BaseStorage[RecordType], Generic[RecordType]):

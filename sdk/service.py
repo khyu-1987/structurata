@@ -6,7 +6,7 @@ from storages.base import BaseStorage
 
 logger = logging.getLogger(__name__)
 
-EMAIL_VALID_STATUS = 'valid'
+EMAIL_VALID_STATUS = "valid"
 
 
 class EmailFinder:
@@ -38,7 +38,12 @@ class VerifiedEmailRecorder:
 
 class VerifiedEmailRunner:
 
-    def __init__(self, finder: EmailFinder, verifier: EmailVerifier, recorder: VerifiedEmailRecorder) -> None:
+    def __init__(
+        self,
+        finder: EmailFinder,
+        verifier: EmailVerifier,
+        recorder: VerifiedEmailRecorder,
+    ) -> None:
         self.finder = finder
         self.verifier = verifier
         self.recorder = recorder
@@ -46,19 +51,21 @@ class VerifiedEmailRunner:
     def run(self, domain: str, first_name: str, last_name: str) -> None:
         find_data = self.finder.find(domain, first_name, last_name)
         if not find_data.email:
-            logger.info('no email found for %s %s @ %s', first_name, last_name, domain)
+            logger.info("no email found for %s %s @ %s", first_name, last_name, domain)
             return
 
         status = self.verifier.verify(find_data.email)
         if status != EMAIL_VALID_STATUS:
-            logger.info('email %s failed verification: %s', find_data.email, status)
+            logger.info("email %s failed verification: %s", find_data.email, status)
             return
 
-        self.recorder.record(VerifiedEmailRecord(
-            email=find_data.email,
-            first_name=find_data.first_name,
-            last_name=find_data.last_name,
-            domain=find_data.domain,
-            status=status,
-        ))
-        logger.info('recorded verified email %s', find_data.email)
+        self.recorder.record(
+            VerifiedEmailRecord(
+                email=find_data.email,
+                first_name=find_data.first_name,
+                last_name=find_data.last_name,
+                domain=find_data.domain,
+                status=status,
+            )
+        )
+        logger.info("recorded verified email %s", find_data.email)

@@ -18,7 +18,7 @@ def storage() -> InMemoryStorage[dict]:
 
 @pytest.fixture
 def client() -> HunterClient:
-    return HunterClient(api_key='bla-bla-bla')
+    return HunterClient(api_key="bla-bla-bla")
 
 
 @pytest.fixture
@@ -48,11 +48,11 @@ def runner(
 @pytest.fixture
 def find_email_response_json() -> dict:
     return {
-        'data': {
-            'email': 'alexis@reddit.com',
-            'first_name': 'Alexis',
-            'last_name': 'Ohanian',
-            'domain': 'reddit.com',
+        "data": {
+            "email": "alexis@reddit.com",
+            "first_name": "Alexis",
+            "last_name": "Ohanian",
+            "domain": "reddit.com",
         },
     }
 
@@ -64,9 +64,9 @@ def find_email_response(find_email_response_json: dict) -> FindEmailResponse:
 
 @pytest.fixture
 def verify_email_valid_response() -> VerifyEmailResponse:
-    return VerifyEmailResponse.model_validate({'data': {'status': 'valid'}})
+    return VerifyEmailResponse.model_validate({"data": {"status": "valid"}})
 
 
 @pytest.fixture
 def verify_email_invalid_response() -> VerifyEmailResponse:
-    return VerifyEmailResponse.model_validate({'data': {'status': 'invalid'}})
+    return VerifyEmailResponse.model_validate({"data": {"status": "invalid"}})
